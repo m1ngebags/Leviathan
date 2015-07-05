@@ -3,7 +3,7 @@ protected Region world;
 protected String[] mapData;
 
 void setup() {
-  size(960,960);
+  size(864,960);
   background(0);
   mapData = loadStrings("ohana.txt");
   world = new Region(mapData);
@@ -15,7 +15,7 @@ void draw(){
 class Region {
 
   protected Tile[][] camera = new Tile[7][10];
-  protected Tile[][] map = new Tile[6][28];
+  protected Tile[][] map = new Tile[30][28];
   protected PImage T = loadImage("terrain.png");
   protected PImage N = loadImage("node.png");
   protected PImage W = loadImage("warp.png");
