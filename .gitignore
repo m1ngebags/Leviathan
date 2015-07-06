@@ -1,3 +1,6 @@
+# venv stuff
+/lev-env
+
 # emacs stuff
 *#
 *~
