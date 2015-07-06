@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block head %}
+<title>lobby</title>
+{% endblock %}
+
+{% block body %}
+<h1>Game Lobby</h1>
+
+<h2>owned games</h2>
+<ul>
+{% if ownergames|length > 0 %}
+{% for g in ownergames %}
+<li><a href="/game/{{g[gameid]}}">{{g[gamename]}}</a></li>
+{% endfor %}
+{% else %}
+<li>you have not created any games</li>
+{% endif %}
+</ul>
+
+<h2>joined games</h2>
+<ul>
+{% if playergames|length > 0 %}
+{% for g in playergames %}
+<li><a href="/game/{{g[gameid]}}">{{g[gamename]}}</a></li>
+{% endfor %}
+{% else %}
+<li>you have not joined any games</li>
+{% endif %}
+</ul>
+
+<h2>other games</h2>
+<ul>
+{% if othergames|length > 0 %}
+{% for g in othergames %}
+<li><a href="/game/{{g[gameid]}}">{{g[gamename]}}</a></li>
+{% endfor %}
+{% else %}
+<li>there are no other games</li>
+{% endif %}
+</ul>
+
+<div class="col-md-3">
+<form role="form" method="post">
+  <h2>Create new game</h2>
+  <div class="form-group">
+   <label for="gamename">Game name:</label>
+   <input type="text" class="form-control" id="gamename" placeholder="Enter name" name=gamename>
+  </div>
+  <div class="form-group">
+   <label for="joinpass">Join password:</label>
+   <input type="text" class="form-control" id="joinpass" placeholder="Optional" name=joinpass>
+  </div>
+  <button type="submit" class="btn btn-default">Create new game</button>
+</form>
+</div>
+
+{% endblock %}

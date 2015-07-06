@@ -9,6 +9,7 @@ app = Flask(__name__)
 client = MongoClient()
 db = client['leviathan']
 acctdb = db['accounts']
+gamedb = db['games']
 
 def hashy(s):
     sha = hashlib.sha512()
@@ -104,8 +105,26 @@ def logout_html():
 def userprofile_html(username):
     return username + "'s profile"
 
-@app.route("/settings")
 @app.route("/lobby")
+def lobby_html():
+    if 'username' in session:
+        ownergames = gamedb.find({'owner':session['username']})
+        playergames = gamedb.find({'owner':{'$ne':session['username']},
+                                   'players':session['username']})
+        othergames = gamedb.find({'players':{'$ne':session['username']}})
+        ownergames = [e for e in ownergames]
+        playergames = [e for e in playergames]
+        othergames = [e for e in othergames]
+
+        return render_template('lobby.html',
+                               ownergames=ownergames,
+                               playergames=playergames,
+                               othergames=othergames)
+    else:
+        flash('you are not logged in')
+        return redirect('/')
+
+@app.route("/settings")
 def placeholder_html():
     return "PLACEHOLDER"
 
@@ -114,5 +133,3 @@ app.secret_key = 'tbsdesu'
 if __name__ == "__main__":
     app.debug = True
     app.run(port = 1247)
-
-checkLogin("ayy","lmoa")
