@@ -1,7 +1,7 @@
 from flask import Flask, session, redirect, url_for, escape, request, render_template, flash, jsonify, json
 from functools import wraps
 from pymongo import MongoClient
-import bson.json_util
+from bson.json_util import dumps
 import hashlib
 
 app = Flask(__name__)
@@ -52,6 +52,9 @@ def checkLogin(username,password):
             errors += ['incorrect password']
     return errors
             
+def initgame():
+    return {}
+
 @app.route("/")
 @app.route("/index")
 def index_html():
@@ -105,24 +108,44 @@ def logout_html():
 def userprofile_html(username):
     return username + "'s profile"
 
-@app.route("/lobby")
+@app.route("/lobby", methods=['GET','POST'])
 def lobby_html():
-    if 'username' in session:
-        ownergames = gamedb.find({'owner':session['username']})
-        playergames = gamedb.find({'owner':{'$ne':session['username']},
-                                   'players':session['username']})
-        othergames = gamedb.find({'players':{'$ne':session['username']}})
-        ownergames = [e for e in ownergames]
-        playergames = [e for e in playergames]
-        othergames = [e for e in othergames]
-
+    errors = []
+    if request.method=='POST':
+        if len(request.form['gamename']) < 1:
+            errors += ['game name is required']
+        if len(errors) < 1:
+            newgame = {'gameid':gamedb.count(),
+                       'gamename':request.form['gamename'],
+                       'joinpass':request.form['joinpass'],
+                       'owner':session['username'],
+                       'players':[session['username']],
+                       'gamestate':initgame()}
+            gamedb.save(newgame)
+            flash('game created successfully')
         return render_template('lobby.html',
-                               ownergames=ownergames,
-                               playergames=playergames,
-                               othergames=othergames)
+                               errors=errors)
     else:
-        flash('you are not logged in')
-        return redirect('/')
+        if 'username' in session:
+            return render_template('lobby.html')
+        else:
+            flash('you are not logged in')
+            return redirect('/')
+
+@app.route("/ajax/gamelist/<username>")
+def gamelist_ajax(username):
+    ownedcursor = gamedb.find({'owner':username})
+    joinedcursor = gamedb.find({'owner':{'$ne':username},
+                               'players':username})
+    othercursor = gamedb.find({'players':{'$ne':username}})
+
+    ownedgames = [e for e in ownedcursor]
+    joinedgames = [e for e in joinedcursor]
+    othergames = [e for e in othercursor]
+    return dumps({'ownedgames':ownedgames,
+                  'joinedgames':joinedgames,
+                  'othergames':othergames})
+    
 
 @app.route("/settings")
 def placeholder_html():

@@ -4,54 +4,49 @@
 {% endblock %}
 
 {% block body %}
-<h1>Game Lobby</h1>
 
-<h2>owned games</h2>
-<ul>
-{% if ownergames|length > 0 %}
-{% for g in ownergames %}
-<li><a href="/game/{{g[gameid]}}">{{g[gamename]}}</a></li>
-{% endfor %}
-{% else %}
-<li>you have not created any games</li>
-{% endif %}
-</ul>
+<!-- page content -->
+<div id="head-reg"></div>
+<h3>owned games</h3>
+<div id="owned-games-reg"></div>
+<h3>joined games</h3>
+<div id="joined-games-reg"></div>
+<h3>other games</h3>
+<div id="other-games-reg"></div>
+<div id="new-game-reg"></div>
 
-<h2>joined games</h2>
-<ul>
-{% if playergames|length > 0 %}
-{% for g in playergames %}
-<li><a href="/game/{{g[gameid]}}">{{g[gamename]}}</a></li>
-{% endfor %}
-{% else %}
-<li>you have not joined any games</li>
-{% endif %}
-</ul>
 
-<h2>other games</h2>
-<ul>
-{% if othergames|length > 0 %}
-{% for g in othergames %}
-<li><a href="/game/{{g[gameid]}}">{{g[gamename]}}</a></li>
-{% endfor %}
-{% else %}
-<li>there are no other games</li>
-{% endif %}
-</ul>
+<!-- marionette templates -->
+<script type="text/template" id="head-template">
+  <h1>Game Lobby</h1>
+</script>
 
-<div class="col-md-3">
-<form role="form" method="post">
-  <h2>Create new game</h2>
-  <div class="form-group">
-   <label for="gamename">Game name:</label>
-   <input type="text" class="form-control" id="gamename" placeholder="Enter name" name=gamename>
+<script type="text/template" id="game-list-template">
+  ASD
+  <div id="game-list-div" class="yolo"></div>
+</script>
+
+<script type="text/template" id="game-list-entry-template">
+  <a href="/game/<%= gameid %>/"><%= gamename %></a> - <%= owner %>
+</script>
+
+<script type="text/template" id="new-game-template">
+  <div class="col-md-3" id="new-game-form-div">
+    <form role="form" method="post">
+      <h2>Create new game</h2>
+      <div class="form-group">
+	<label for="gamename">Game name:</label>
+	<input type="text" class="form-control" id="gamename" placeholder="Enter name" name=gamename>
+      </div>
+      <div class="form-group">
+	<label for="joinpass">Join password:</label>
+	<input type="text" class="form-control" id="joinpass" placeholder="Optional" name=joinpass>
+      </div>
+      <button type="submit" class="btn btn-default">Create new game</button>
+    </form>
   </div>
-  <div class="form-group">
-   <label for="joinpass">Join password:</label>
-   <input type="text" class="form-control" id="joinpass" placeholder="Optional" name=joinpass>
-  </div>
-  <button type="submit" class="btn btn-default">Create new game</button>
-</form>
-</div>
+</script>
+
+<script src="/static/lobby.js"></script>
 
 {% endblock %}
