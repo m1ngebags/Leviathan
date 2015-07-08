@@ -113,6 +113,6 @@ def placeholder_html():
 app.secret_key = 'tbsdesu'
 if __name__ == "__main__":
     app.debug = True
-    app.run(port = 1247)
+    app.run(host = "0.0.0.0", port = 1247)
 
 checkLogin("ayy","lmoa")
