@@ -1,7 +1,7 @@
 from flask import Flask, session, redirect, url_for, escape, request, render_template, flash, jsonify, json
 from functools import wraps
 from pymongo import MongoClient
-import bson.json_util
+from bson.json_util import dumps
 import hashlib
 
 app = Flask(__name__)
@@ -9,6 +9,7 @@ app = Flask(__name__)
 client = MongoClient()
 db = client['leviathan']
 acctdb = db['accounts']
+gamedb = db['games']
 
 def hashy(s):
     sha = hashlib.sha512()
@@ -51,6 +52,9 @@ def checkLogin(username,password):
             errors += ['incorrect password']
     return errors
             
+def initgame():
+    return {}
+
 @app.route("/")
 @app.route("/index")
 def index_html():
@@ -104,8 +108,46 @@ def logout_html():
 def userprofile_html(username):
     return username + "'s profile"
 
+@app.route("/lobby", methods=['GET','POST'])
+def lobby_html():
+    errors = []
+    if request.method=='POST':
+        if len(request.form['gamename']) < 1:
+            errors += ['game name is required']
+        if len(errors) < 1:
+            newgame = {'gameid':gamedb.count(),
+                       'gamename':request.form['gamename'],
+                       'joinpass':request.form['joinpass'],
+                       'owner':session['username'],
+                       'players':[session['username']],
+                       'gamestate':initgame()}
+            gamedb.save(newgame)
+            flash('game created successfully')
+        return render_template('lobby.html',
+                               errors=errors)
+    else:
+        if 'username' in session:
+            return render_template('lobby.html')
+        else:
+            flash('you are not logged in')
+            return redirect('/')
+
+@app.route("/ajax/gamelist/<username>")
+def gamelist_ajax(username):
+    ownedcursor = gamedb.find({'owner':username})
+    joinedcursor = gamedb.find({'owner':{'$ne':username},
+                               'players':username})
+    othercursor = gamedb.find({'players':{'$ne':username}})
+
+    ownedgames = [e for e in ownedcursor]
+    joinedgames = [e for e in joinedcursor]
+    othergames = [e for e in othercursor]
+    return dumps({'ownedgames':ownedgames,
+                  'joinedgames':joinedgames,
+                  'othergames':othergames})
+    
+
 @app.route("/settings")
-@app.route("/lobby")
 def placeholder_html():
     return "PLACEHOLDER"
 
@@ -115,4 +157,4 @@ if __name__ == "__main__":
     app.debug = True
     app.run(host = "0.0.0.0", port = 1247)
 
-checkLogin("ayy","lmoa")
+
