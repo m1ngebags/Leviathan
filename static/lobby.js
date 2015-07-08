@@ -40,6 +40,7 @@ App.NewGameView = Mn.ItemView.extend({
 App.GameListEntryView = Mn.ItemView.extend({
     template: "#game-list-entry-template",
     initialize: function() {
+	console.log(this.$());
 	this.render();
     },
     events: {},
@@ -48,10 +49,25 @@ App.GameListEntryView = Mn.ItemView.extend({
     }
 });
 
+OwnedGameListEntryView = App.GameListEntryView.extend({
+    template: "#owned-game-list-entry-template"
+});
+JoinedGameListEntryView = App.GameListEntryView.extend({
+    template: "#joined-game-list-entry-template"
+});
+OtherGameListEntryView = App.GameListEntryView.extend({
+    template: "#other-game-list-entry-template"
+});
+
 App.GameListView = Mn.CollectionView.extend({
     template: "#game-list-template",
-    childView: App.GameListEntryView,
     childViewContainer: "div#game-list-div",
+    getChildView: function(item) {
+	console.log(item.get('players'));
+	if (item.get('owner')==USERNAME) {return OwnedGameListEntryView;}
+	else if (USERNAME in item.get('players')) {return JoinedGameListEntryView;}
+	else {return OtherGameListEntryView;}
+    },
     initialize: function() {
 	this.render();
     },
@@ -61,7 +77,7 @@ App.GameListView = Mn.CollectionView.extend({
     }
 });
 
-var GameListEntry = Backbone.Model.extend({});
+var GameListEntry = Backbone.Model.extend();
 var GameList = Backbone.Collection.extend({
     model:GameListEntry,
     //comparator:function(){return <somesortofidthing???>;}
